@@ -1,13 +1,14 @@
 import sqlite3
 from random import randint
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, InputFile
 from aiogram.types import BotCommand, Message
 
+
 # Создаем объекты бота и диспетчера
-bot = Bot(token="ВАШ ТОКЕН")
+bot = Bot(token="ВАШ_ТОКЕН")
 dp = Dispatcher()
 
 
@@ -79,7 +80,7 @@ async def process_help_command(message: Message):
     k = polizovat(f'{message.from_user.id}')
     if k == 'Вы прочитали все мои книги!!!':
         await message.answer(
-            text=k,
+            text=k
         )
     else:
         await message.answer(
@@ -141,15 +142,20 @@ async def process_help_command(message: Message):
 
 # -----------------------------------------------------------------------------------------------------------------------
 
-#  хэндлер на команду "/add_new"
 @dp.message(Command(commands=['add_new']))
 async def process_help_command(message: Message):
-    await message.answer(
-        'Напиши название\n'
-        'Напиши автора\n'
-        'Жанры и поджанры\n'
-        'Можешь написать сюжет, как ты его видишь\n'
-    )
+    if message.text == '/add_new':
+        await message.answer(
+            'Ваше сообщение должно выглядеть так:\n'
+            '"/add_new\n'
+            'Напиши название\n'
+            'Напиши автора\n'
+            'Жанры и поджанры\n'
+            'Можешь написать сюжет, как ты его видишь"'
+        )
+    else:
+        print(message.text)
+        await message.answer('Ваша рекомендация принята. Находится в обработке')
 
 
 # ----------------------------------------------------------------------------------------
@@ -164,6 +170,19 @@ async def process_help_command(message: Message):
     )
 
 
+@dp.message(Command(commands=['chistopol']))
+async def send_photo(message: types.Message):
+    # Указываем путь к файлу
+    photo_j = types.FSInputFile("data/в.jpg")
+    # file_id = message.photo[-1].file_id
+    user_text = message.text
+    print(user_text)
+    # Отправляем фото
+    await bot.send_photo(
+        chat_id=message.chat.id,
+        photo=photo_j,
+        caption=f'Чистополь!!'
+    )
 # ----------------------------------------------------------------------------------------
 # Создаем асинхронную функцию
 async def set_main_menu(bot: Bot):
@@ -172,7 +191,8 @@ async def set_main_menu(bot: Bot):
         BotCommand(command='/start', description='Начать работу с ботом'),
         BotCommand(command='/help', description='Справка'),
         BotCommand(command='/about', description='Об авторе'),
-        BotCommand(command='/add_new', description='Предложение добавить вашу книгу')
+        BotCommand(command='/add_new', description='Предложение добавить вашу книгу'),
+        BotCommand(command='/chistopol', description='Чистополь')
     ]
     await bot.set_my_commands(main_menu_commands)
 
@@ -186,3 +206,4 @@ async def send_answer(message: Message):
 if __name__ == '__main__':
     dp.startup.register(set_main_menu)
     dp.run_polling(bot)
+
